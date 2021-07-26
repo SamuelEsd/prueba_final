@@ -22,3 +22,5 @@ Auth::routes(['verify' => true]);
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::apiResource('/discs', DiscController::class);
+
+Route::get('/searchdiscs', [App\Http\Controllers\DiscController::class, 'search']);

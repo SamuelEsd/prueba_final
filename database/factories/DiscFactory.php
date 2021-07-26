@@ -26,7 +26,7 @@ class DiscFactory extends Factory
             'album' => $this->faker->name,
             'artist' => $this->faker->name,
             'year' => $this->faker->year,
-            'photo' => $this->faker->name,
+            'photo' => 'default.png',
         ];
     }
 }

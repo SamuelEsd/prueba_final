@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Disc;
 use Illuminate\Http\Request;
+use SebastianBergmann\Environment\Console;
 
 class DiscController extends Controller
 {
@@ -14,7 +15,7 @@ class DiscController extends Controller
      */
     public function index()
     {
-        return Disc::get();
+        return Disc::orderBy('name')->get();
     }
 
     /**
@@ -25,8 +26,19 @@ class DiscController extends Controller
      */
     public function store(Request $request)
     {
+
+        // $new_image_name = time() . '-' . $request->name . '.' .
+        // $request->photo->extension();
+        //$request->photo->move(public_path('images/users'), $new_image_name);
+
         $disc = new Disc;
-        $disc->create($request->all());
+        $disc->create([
+            'name' => $request->name,
+            'album' => $request->album,
+            'artist' => $request->artist,
+            'year' => $request->year,
+            'photo' => 'hola',
+        ]);
     }
 
     /**
@@ -49,7 +61,7 @@ class DiscController extends Controller
      */
     public function update(Request $request, Disc $disc)
     {
-        //
+        $disc->update($request->all());
     }
 
     /**
@@ -61,5 +73,15 @@ class DiscController extends Controller
     public function destroy(Disc $disc)
     {
         $disc->delete();
+    }
+
+
+    public function search(Request $request)
+    {
+        $filter = $request->buscador;
+        $discs = Disc::filterByNameAlbumArtist($filter)
+                    ->get();
+
+        return $discs;
     }
 }
