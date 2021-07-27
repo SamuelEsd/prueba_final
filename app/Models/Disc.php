@@ -26,5 +26,10 @@ class Disc extends Model
         }
         
     }
+
+    // Relación muchos a muchos
+    public function genres(){
+        return $this->belongsToMany(Genre::class);
+    }
     
 }

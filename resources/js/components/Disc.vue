@@ -2,13 +2,13 @@
     <div>
         <h1 class="text-center">Discos</h1>
 
-        <form class="form-inline my-2 my-lg-0">
+        <form class="form-inline my-2 my-lg-0" onsubmit="return false;">
             <div class="col text-center">
                 <input class="form-control mr-sm-2 col-lg-8" type="search" 
                 placeholder="Search" aria-label="Search"
                 v-model="buscador"
                 @keyup="search_discs">
-                <button class="btn btn-outline-succes my-2 my-sm-0" type="submit">Search</button>
+                <!-- <button class="btn btn-outline-succes my-2 my-sm-0" type="submit">Search</button> -->
             </div>
         </form>
 
@@ -44,6 +44,15 @@
                                 <input v-model="disc.year" class="form-control"  type="tel" name="year" id="year" placeholder="Año">
                                 
                             </div>
+                            <div>
+                                <label for="genres">Generos</label>
+                                <select class="form-control" name="genres" id="genres" v-model="disc.genres_temp" multiple >
+                                    <option v-for="genre in disc.genres" :key="genre.name">
+                                        {{ genre }}
+                                    </option>
+                                </select>
+                                <!-- <input     id="year" placeholder="Año"> -->
+                            </div>
                             <div >
                                 <label for="photo">Foto</label>
                                 <input v-model="disc.photo" class="form-control" type="text" name="photo" id="photo" placeholder="Foto">
@@ -66,6 +75,7 @@
                 <th scope="col">Album</th>
                 <th scope="col">Artista</th>
                 <th scope="col">Año</th>
+                <th scope="col">Genero</th>
                 <th scope="col">Foto</th>
 
                 <th scope="col" colspan="2" class="text-center">
@@ -79,17 +89,23 @@
             </thead>
             <tbody>
                 <tr v-for="disc in discs" :key="disc.id">
-                <!-- <th scope="row"> {{ disc.id }} </th> -->
-                <td> {{ disc.name }} </td>
-                <td> {{ disc.album }} </td>
-                <td> {{ disc.artist }} </td>
-                <td> {{ disc.year }} </td>
-                <td> <img v-bind:src="'images/albums/' + disc.photo"
-                class="landscape" alt=""> </td>
-                <td> 
-                    <button @click="update=true; openModal(disc);" class="btn btn-primary">Editar</button>    
-                    <button @click="erase(disc.id)" class="btn btn-secodary btn-outline-danger">Eliminar</button>
-                </td>
+                    <!-- <th scope="row"> {{ disc.id }} </th> -->
+                    <td> {{ disc.name }} </td>
+                    <td> {{ disc.album }} </td>
+                    <td> {{ disc.artist }} </td>
+                    <td> {{ disc.year }} </td>
+                    <td v-if="!disc.genres.length">No items in genre</td>
+                    <td v-if="disc.genres.length">
+                        <li v-for="genre in disc.genres" :key="genre.name"> 
+                            {{ genre.name }}
+                        </li>
+                    </td>
+                    <td> <img v-bind:src="'images/albums/' + disc.photo"
+                    class="landscape" alt=""> </td>
+                    <td> 
+                        <button @click="update=true; openModal(disc);" class="btn btn-primary">Editar</button>    
+                        <button @click="erase(disc.id)" class="btn btn-secodary btn-outline-danger">Eliminar</button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -101,11 +117,13 @@
 export default {
     data() {
         return {
+            genres_temp: [],
             discs:[],
             disc:{
                 name: '',
                 album: '',
                 artist: '',
+                genres: [],
                 year: '',
                 photo: '',
             },
@@ -118,6 +136,7 @@ export default {
         }
     },
     methods: {
+        // search discs with a query
         async get_discs(){
             const res = await axios.get('searchdiscs',{
                 params: {
@@ -128,20 +147,19 @@ export default {
         },
         search_discs() {
             clearTimeout(this.search_timeout);
-            this.search_timeout = setTimeout(this.get_discs, 400)
+            this.search_timeout = setTimeout(this.get_discs, 350)
         },
-
+        // lists all discs
         async list() {
             const res = await axios.get('discs');
             this.discs = res.data;
-            console.log(this.buscador);
         },
-
+        // erases a specific disc
         async erase(id) {
             const res = await axios.delete('discs/'+id);
             this.list();
         },
-
+        // save a new disc
         async save() {
             if(this.update){
                 const res = await axios.put('/discs/'+this.id, this.disc);
@@ -154,7 +172,7 @@ export default {
             this.closeModal();
             this.list();
         },
-
+        // initialize the data for the modal
         async openModal(data={}) {
             this.modal = 1;
             if (this.update) {
@@ -163,8 +181,11 @@ export default {
                 this.disc.name = data.name;
                 this.disc.album = data.album;
                 this.disc.artist = data.artist;
+                this.disc.genres = data.genres;
+                this.genres_temp = data.genres;
                 this.disc.year = data.year;
                 this.disc.photo = data.photo;
+                console.log(this.disc);
             }
             else{
                 this.id = 0;

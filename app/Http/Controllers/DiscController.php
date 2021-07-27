@@ -15,7 +15,7 @@ class DiscController extends Controller
      */
     public function index()
     {
-        return Disc::orderBy('name')->get();
+        return Disc::with('genres')->orderBy('name')->get();
     }
 
     /**
